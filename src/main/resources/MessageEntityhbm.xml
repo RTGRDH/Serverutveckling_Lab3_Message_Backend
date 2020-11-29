@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="Message_Backend.demo.bo.MessageEntity" table="message" schema="server_db">
+        <id name="id">
+            <column name="id" sql-type="int"/>
+        </id>
+        <property name="title">
+            <column name="title" sql-type="varchar(45)" length="45" not-null="true"/>
+        </property>
+        <property name="content">
+            <column name="content" sql-type="varchar(45)" length="45" not-null="true"/>
+        </property>
+        <property name="sent">
+            <column name="sent" sql-type="datetime" not-null="true"/>
+        </property>
+        <many-to-one name="toUser" class="Message_Backend.demo.bo.UsersEntity" column="toUserId_fk">
+        </many-to-one>
+        <many-to-one name="fromUser" class="Message_Backend.demo.bo.UsersEntity" column="fromUserId_fk">
+        </many-to-one>
+    </class>
+</hibernate-mapping>
