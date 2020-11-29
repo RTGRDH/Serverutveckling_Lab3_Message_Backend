@@ -14,8 +14,7 @@ import java.util.List;
 public class MessageController {
     @CrossOrigin
     @GetMapping("/getMessages")
-    public ResponseEntity<List<Message>> getMessages(@RequestParam String currentUser)
-    {
+    public ResponseEntity<List<Message>> getMessages(@RequestParam String currentUser) throws ProtocolException {
         System.out.println("Fetching current user '" + currentUser + "' messages");
         List<Message> msgs = MessageHandler.getMessages(currentUser);
         return ResponseEntity.ok(msgs);

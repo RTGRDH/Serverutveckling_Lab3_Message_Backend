@@ -4,6 +4,7 @@ package Message_Backend.demo.handler;
 import Message_Backend.demo.bo.Message;
 import Message_Backend.demo.bo.UsersEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.tomcat.util.json.JSONParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,46 +20,46 @@ public class MessageHandler {
     public static Boolean sendMessage(String title, String content, String toUser, String currUser) throws ProtocolException {
         //get user
         UsersEntity toUsers = getUser(toUser);
-        UsersEntity currUsers = new UsersEntity();
-
-        /*if(Message.sendMessage(title, content, toUsers, currUsers)){
-            return true;
-        }*/
+        UsersEntity currUsers = getUser(currUser);
+        if(toUsers != null && currUsers != null){
+            if(Message.sendMessage(title, content, toUsers, currUsers)){
+                return true;
+            }
+        }
         return false;
     }
 
-    public static List<Message> getMessages(String currUser) {
-        UsersEntity curr = new UsersEntity();
+    public static List<Message> getMessages(String currUser) throws ProtocolException {
+        UsersEntity curr = getUser(currUser);
         ArrayList<Message> msgs = Message.getMessages(curr);
         return msgs;
     }
 
     private static UsersEntity getUser(String name) throws ProtocolException {
+        HttpURLConnection connection = null;
         try {
             //Koppla till users container
-            HttpURLConnection connection = (HttpURLConnection) new URL("http://user_backend:8002/getUser").openConnection();
+            connection = (HttpURLConnection) new URL("http://user-backend:8002/getUser?name=" + name).openConnection();
 
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("name", name);
-
             int responseCode = connection.getResponseCode();
-            if (responseCode == 200) {
-                String response = "";
-                Scanner scanner = new Scanner(connection.getInputStream());
-                while (scanner.hasNextLine()) {
-                    response += scanner.nextLine();
-                    response += "\n";
-                }
-                scanner.close();
-                System.out.println(response);
-                return null;
-            }
 
+
+            if (responseCode == 200) {
+                ObjectMapper mapper = new ObjectMapper();
+                UsersEntity user = mapper.readValue(connection.getInputStream(), UsersEntity.class);
+                System.out.println("Got user: " + user.getUsername() + " from API call");
+                return user;
+            }
             // an error happened
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }finally{
+            if(connection != null) {
+                connection.disconnect();
+            }
         }
         return null;
     }
